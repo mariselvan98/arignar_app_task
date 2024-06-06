@@ -1,5 +1,7 @@
 import 'package:arignar_app_task/pages/question_page/question_page.dart';
 import 'package:arignar_app_task/utils/constant/questions.dart';
+import 'package:arignar_app_task/widgets/appbar.dart';
+import 'package:arignar_app_task/widgets/drawer.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
@@ -27,43 +29,8 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: Drawer(
-        child: Column(
-          children: [
-            Container(
-              color: const Color(0xff7abeb0),
-              height: MediaQuery.of(context).size.height * 0.2,
-              child: const Center(
-                child: Text(
-                  "Mari Selvan",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                ),
-              ),
-            ),
-            const Divider(),
-            const ListTile(
-              leading: Icon(Icons.person),
-              title: Text("Change Profile"),
-            ),
-            const ListTile(
-              leading: Icon(Icons.list),
-              title: Text("Change Subject"),
-            ),
-            const ListTile(
-              leading: Icon(Icons.settings),
-              title: Text("Settings"),
-            ),
-            const ListTile(
-              leading: Icon(Icons.logout),
-              title: Text("Logout"),
-            )
-          ],
-        ),
-      ),
-      appBar: AppBar(
-        backgroundColor: const Color(0xff7abeb0),
-        title: const Text("Domestic Animals"),
-      ),
+      drawer: drawer(context),
+      appBar: appbar("Domestic Animals"),
       body: Container(
           padding: const EdgeInsets.only(top: 20),
           height: MediaQuery.of(context).size.height,
