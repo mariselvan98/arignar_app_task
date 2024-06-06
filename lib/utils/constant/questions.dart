@@ -9,7 +9,7 @@ class Questions {
     },
     {
       "queston":
-          "https://www.nylabone.com/-/media/project/oneweb/nylabone/images/dog101/10-intelligent-dog-breeds/golden-retriever-tongue-out.jpg",
+          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQAurFh7iobPA37Fe1zGz28ElJEdghTknjCBVepT4rJ8yLVp4TEpcZlNTuhK-QJyi4qixA&usqp=CAU",
       "quesionType": "IMAGE",
       "isMultipleAnswer": false,
       "answer": "Dog"
@@ -23,10 +23,10 @@ class Questions {
     },
     {
       "queston":
-          "https://www.zinpro.com/wp-content/uploads/2023/06/Piglet_In_Commercial_Farm_1200x600.jpg",
+          "https://www.wildlifetrusts.org/sites/default/files/styles/large/public/2017-12/Rabbit%C2%A9JonHawkins.jpg?itok=eORz0vNF",
       "quesionType": "IMAGE",
       "isMultipleAnswer": false,
-      "answer": "Pig"
+      "answer": "Rabbit"
     },
     {
       "queston":

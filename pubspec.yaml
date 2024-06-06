@@ -39,6 +39,8 @@ dependencies:
   percent_indicator: ^4.2.3
   flutter_tts: ^4.0.2
   speech_to_text: ^6.6.2
+  fluttertoast: ^8.2.6
+  gif: ^2.3.0
 
 dev_dependencies:
   flutter_test:

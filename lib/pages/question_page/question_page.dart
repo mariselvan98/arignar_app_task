@@ -1,9 +1,13 @@
 import 'package:arignar_app_task/widgets/appbar.dart';
+import 'package:arignar_app_task/widgets/dialog.dart';
 import 'package:arignar_app_task/widgets/drawer.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
-import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:speech_to_text/speech_recognition_result.dart';
+import 'package:speech_to_text/speech_to_text.dart';
 
 class QuestionPage extends StatefulWidget {
   const QuestionPage({super.key, required this.questions});
@@ -16,10 +20,9 @@ class QuestionPage extends StatefulWidget {
 
 class _QuestionPageState extends State<QuestionPage> {
   late List questions = widget.questions;
-  bool isListening = false;
+  bool isListening = false, isCorrectAnswer = false;
   String spokenText = '';
   FlutterTts flutterTts = FlutterTts();
-  stt.SpeechToText speech = stt.SpeechToText();
 
   Future<void> _initializeTts() async {
     await flutterTts.awaitSpeakCompletion(true);
@@ -31,6 +34,7 @@ class _QuestionPageState extends State<QuestionPage> {
     if (currentQuestionIndex < questions.length - 1) {
       setState(() {
         currentQuestionIndex++;
+        spokenText = '';
       });
     }
   }
@@ -49,33 +53,34 @@ class _QuestionPageState extends State<QuestionPage> {
     await flutterTts.speak(text);
   }
 
-  Future<void> listen() async {
-    if (!isListening) {
-      bool available = await speech.initialize(
-        onStatus: (val) => print('onStatus: $val'),
-        onError: (val) => print('onError: $val'),
-      );
-      if (available) {
-        setState(() => isListening = true);
-        speech.listen(
-          onResult: (val) => setState(() {
-            spokenText = val.recognizedWords;
-            if (val.hasConfidenceRating && val.confidence > 0) {
-              print('Confidence: ${val.confidence}');
-            }
-          }),
-        );
-      }
-    } else {
-      setState(() => isListening = false);
-      speech.stop();
-    }
+  final SpeechToText _speechToText = SpeechToText();
+  void _initSpeech() async {
+    isListening = await _speechToText.initialize();
+  }
+
+  void _startListening() async {
+    await _speechToText.listen(
+      onResult: onSpeechResult,
+      listenFor: const Duration(seconds: 30),
+      localeId: "en_En",
+    );
+    setState(() {});
+  }
+
+  void onSpeechResult(SpeechRecognitionResult result) {
+    setState(() {
+      spokenText = result.recognizedWords;
+      isListening = false;
+    });
   }
 
   @override
   void initState() {
     super.initState();
     _initializeTts();
+    if (!isListening) {
+      _initSpeech();
+    }
   }
 
   @override
@@ -99,23 +104,6 @@ class _QuestionPageState extends State<QuestionPage> {
                 barRadius: const Radius.circular(10),
               ),
             ),
-            // const SizedBox(height: 20),
-            // const SizedBox(height: 20),
-            // Image.network(questions[currentQuestionIndex]['queston']),
-            // const SizedBox(height: 20),
-            // Row(
-            //   children: [
-            //     ElevatedButton(
-            //       onPressed: preQuestion,
-            //       child: const Text('prv'),
-            //     ),
-            //     ElevatedButton(
-            //       onPressed: nextQuestion,
-            //       child: const Text('Next'),
-            //     ),
-            //   ],
-            // )
-
             Container(
               margin: const EdgeInsets.only(top: 20),
               height: MediaQuery.of(context).size.height * 0.6,
@@ -140,7 +128,7 @@ class _QuestionPageState extends State<QuestionPage> {
                     Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
                               questions[currentQuestionIndex]['answer'],
@@ -160,40 +148,46 @@ class _QuestionPageState extends State<QuestionPage> {
                           ]),
                     ),
                     IconButton(
-                      icon: Icon(isListening ? Icons.mic : Icons.mic_none),
-                      onPressed: listen,
+                      icon: Icon(
+                        isListening
+                            ? Icons.mic_none_rounded
+                            : Icons.mic_off_outlined,
+                        size: 60,
+                      ),
+                      onPressed: _startListening,
                     ),
                     Text(spokenText),
                     const Spacer(),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0, vertical: 8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          ElevatedButton(
-                            onPressed: preQuestion,
-                            style: ElevatedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 24, vertical: 12),
-                            ),
-                            child: const Text('Previous'),
+                    GestureDetector(
+                      onTap: () {
+                        if (questions[currentQuestionIndex]['answer']
+                                .toUpperCase() ==
+                            spokenText.toUpperCase()) {
+                          setState(() {
+                            isCorrectAnswer = true;
+                          });
+                        } else {
+                          setState(() {
+                            isCorrectAnswer = false;
+                          });
+                        }
+                        showResultDialog(
+                            context, isCorrectAnswer, nextQuestion);
+                      },
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(30.0),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
+                          color: Colors.white,
+                          child: const Text(
+                            'Custom Button',
+                            style: TextStyle(
+                                color: Color(0xff7abeb0),
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold),
                           ),
-                          ElevatedButton(
-                            onPressed: nextQuestion,
-                            style: ElevatedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 24, vertical: 12),
-                            ),
-                            child: const Text('Next'),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
